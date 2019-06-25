@@ -1,0 +1,185 @@
+<!--
+ @Copyright 2019 Cisco Systems Inc. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+  1. Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in
+the documentation and/or other materials provided with the
+  distribution.
+
+    THIS SOFTWARE IS PROVIDED BY CISCO ''AS IS'' AND ANY EXPRESS OR IMPLIED
+WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN
+NO EVENT SHALL CISCO OR CONTRIBUTORS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+  The views and conclusions contained in the software and documentation
+are those of the authors and should not be interpreted as representing
+official policies, either expressed or implied, of Cisco.
+-->
+<!----------------------------------------------------------------------------------
+- @file panTool.html
+- @author Duanpei Wu; duanpei@cisco.com
+- @version 1.0
+----------------------------------------------------------------------------------->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pan Performance Test Tool</title>
+</head>
+<body>
+<p>
+
+  <!-- to get meeting and session information --->
+<div id="meetingInfo" style="align-content:center; white-space: nowrap">
+  <table border="1"  align = "center">
+    <tr align="center">
+      <td>Meeting Parameters</td>
+      <td>Session Parameters</td>
+    </tr>
+    <tr>
+      <td>
+        siteURL:<input id="siteUrlInput" style="width: 300px" type="text" value="https://skytech-dev.webex.com.cn">
+        <select id="siteUrl" >
+          <option value="https://skytech-test.webex.com.cn" id="183 354 212">skytech-test</option>
+          <option value="https://skytech-dev.webex.com.cn" id="103 896 592">skytech-dev</option>
+        </select> <br>
+        MeetingKey:<input id="meetingKey" type="text" value="103 896 592"><br>
+        Email:<input id="email" type="text" value="dwu@cisco.com"><br>
+        Username:<input id="userName" type="text" value="dwu"><br>
+        Password:<input id="userPassword" type="text" value=""><br>
+        DisplayName:<input id="userDisplayName" type="text" value=""><br>
+        SessionToken:<input id="sessionToken" type="text" value="">
+      </td>
+      <td>
+        <table align="left">
+          <tr>
+            <td><b>audio:</b></td>
+            <td colspan="2"> recv: <input type="checkbox" id="audioRecvFlag" style="width: 20px" checked>
+              send: <input type="checkbox" id="audioSendFlag" style="width: 20px" checked>
+              viaVoIP: <input type="checkbox" id="audioViaVoIP" style="width: 20px" checked>
+              muteOnEntry: <input type="checkbox" id="audioMuteOnEntry" style="width: 20px">
+            </td>
+          </tr>
+          <tr>
+            <td><b>video:</b> </td>
+            <td>recv: <input type="checkbox" id="videoRecvFlag" style="width: 20px" checked> </td>
+            <td>height <input type="text" id="RecvHeight" style="width: 40px", value="720">
+              bitrate: <input type="text" id="RecvBitrate" style="width: 60px", value="1920000">
+              chnNum: <input type="text" id="RecvChuNum" style="width: 40px", value="7">
+            </td>
+          </tr>
+          <tr>
+            <td></td>
+            <td>send: <input type="checkbox" id="videoSendFlag" style="width: 20px"> </td>
+            <td>height <input type="text" id="SendHeight" style="width: 40px", value="720">
+              bitrate <input type="text" id="SendBitrate" style="width: 60px", value="1920000">
+            </td>
+          </tr>
+          <tr>
+            <td><b>sharing:</b> </td>
+            <td  colspan="2">recv: <input type="checkbox" id="sharingRecvFlag" style="width: 20px"> </td>
+          </tr>
+          <tr>
+            <td></td>
+            <td  colspan="2">send: <input type="checkbox" id="sharingSendFlag" style="width: 20px">
+              framerate <input type="text" id="sharingFrameRate" style="width: 40px" value="5">
+            </td>
+          </tr>
+          <tr>
+            <td colspan="3"> auto-subscription <input type="checkbox" id="autoSubFlag" style="width: 20px" checked> </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <!-- join-in button -->
+  <div align="center" style="background-color: lightgrey; width:600px; margin: 10px auto; padding: 5px">
+    <button id="JoinMeeting">Join Meeting</button>
+  </div>
+
+</div>
+
+<!-- running panel to show video, audio, sharing, user list and control -->
+<div id="runPanel"  hidden="true" style="white-space: nowrap">
+  <table align = "center">
+    <tr>
+      <td > <table  width="780px" height="690px" border="1" align = "center">
+        <tr height="500px" >
+          <td colspan="12" hidden="true" id="liveVideo"></td>
+          <td colspan="12" align="center" id="liveVideoText"> Waiting for video </td>
+        </tr>
+        <tr height="30px">
+          <td colspan="12"  align="center" id="liveVideoLabel"> peerId 0  </td>
+        </tr>
+        <tr height="30px">
+          <td id="liveAudio0" colspan="3"> </td>
+          <td id="liveAudio1" colspan="3"> </td>
+          <td id="liveAudio2" colspan="3"> </td>
+          <td id="liveAudio3" colspan="3"> </td>
+        </tr>
+        <tr height="100px">
+          <td width="130px" hidden="true" id="videoThumb1" colspan="2"></td>
+          <td width="130px" id="videoThumbText1"  colspan="2"> no video </td>
+          <td width="130px" hidden="true" id="videoThumb2" colspan="2"></td>
+          <td width="130px" id="videoThumbText2"  colspan="2"> no video </td>
+          <td width="130px" hidden="true" id="videoThumb3" colspan="2"></td>
+          <td width="130px" id="videoThumbText3"  colspan="2"> no video </td>
+          <td width="130px" hidden="true" id="videoThumb4" colspan="2"></td>
+          <td width="130px" id="videoThumbText4"  colspan="2"> no video </td>
+          <td width="130px" hidden="true" id="videoThumb5" colspan="2"></td>
+          <td width="130px" id="videoThumbText5"  colspan="2"> no video </td>
+          <td width="130px" hidden="true" id="videoThumb6" colspan="2"></td>
+          <td width="130px" id="videoThumbText6"  colspan="2"> no video </td>
+        </tr>
+        <tr height="30px">
+          <td width="130px" id="videoThumbLabel1" colspan="2"> peer 1 </td>
+          <td width="130px" id="videoThumbLabel2" colspan="2"> peer 2 </td>
+          <td width="130px" id="videoThumbLabel3" colspan="2"> peer 3 </td>
+          <td width="130px" id="videoThumbLabel4" colspan="2"> peer 4 </td>
+          <td width="130px" id="videoThumbLabel5" colspan="2"> peer 5 </td>
+          <td width="130px" id="videoThumbLabel6" colspan="2"> peer 6 </td>
+        </tr>
+      </table> </td>
+      <td>
+        <table height="690px" border="1" align = "center">
+          <tr height="30px" align = "center"><td>Users</td></tr>
+          <tr height="675px"><td  valign="top">
+            <select id="userRoster" style="width:350px" size=42></select>
+          </td></tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+  <div align = "center" style="background-color:lightgrey; width:600px; padding:5px; margin:10px auto">
+    <button id="LeaveMeeting">Leave Meeting</button>
+    <button id="sendVideo">Start Send Video</button>
+    <span style="color: purple">MicMuted : <input type="checkbox" id="muteCheck" style="width: 20px"></span>
+  </div>
+</div>
+
+<script src="./panTool.js" > </script>
+<script src="https://skytech-dev.webex.com.cn/webapp/latest/webex-webapp-sdk.js?traceLevel=4,callback=onSdkLoaded" > </script>
+
+<!--
+<script src="https://api.webex.com/webapp/latest/webex-webapp-sdk.js?traceLevel=4,callback=onSdkLoaded" > </script>
+<script src="https://skytech-dev.webex.com.cn/webapp/latest/webex-webapp-sdk.js?traceLevel=4,callback=onSdkLoaded" > </script>
+
+-->
+
+</body>
+</html>
