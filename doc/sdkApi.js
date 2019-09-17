@@ -1,40 +1,12 @@
 /**
- @Copyright 2019 Cisco Systems Inc. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-  1. Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright
-notice, this list of conditions and the following disclaimer in
-the documentation and/or other materials provided with the
-  distribution.
-
-    THIS SOFTWARE IS PROVIDED BY CISCO ''AS IS'' AND ANY EXPRESS OR IMPLIED
-WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN
-NO EVENT SHALL CISCO OR CONTRIBUTORS BE LIABLE FOR ANY
-DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
-GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
-OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-  The views and conclusions contained in the software and documentation
-are those of the authors and should not be interpreted as representing
-official policies, either expressed or implied, of Cisco.
- */
-
-/**********************************************************************
+ * @Copyright 2019 Cisco Systems Inc. All rights reserved.
+ *
  * @file sdkApi.js
  * @author Duanpei Wu; duanpei@cisco.com
  * @version 1.0
  *
+ * history:
+ *   init: Nov. 13, 2018; initial version; Duanpei Wu; duanpei@cisco.com
  *
  * This file provides the abstract Service to call Webex WebApp SDK to implement all of services
  * including in-meeting, pre/post-meeting, site operation and WebRTC tool features. The actual
@@ -49,8 +21,7 @@ official policies, either expressed or implied, of Cisco.
  *
  * ---- an illustrated Example ----
  * You may refer to the example application such as panTool in DemoApp for the detail
- ***********************************************************************/
-
+ */
 
 'use strict';
 import Tracer from "../Utility/trace.js";
@@ -105,7 +76,8 @@ const WebexSDK = {
       type: 'joinMeeting',     // (mandatory)
       meetingKey: 0,           // (mandatory) a 9-digit meeting key
 
-      // (mandatory for the first callback) "success", "failure", "close", "InProgress", "meetingLocked", and "in-lobby".
+      // (mandatory for the first callback) "success", "failure", "close", "InProgress", "meetingLocked",
+      //                                    "waitForHost" and "in-lobby".
       // (optional for followed up callback)
       status:  "success",
 
@@ -201,13 +173,16 @@ const WebexSDK = {
     //   nodeId:     a 32-bit number to identify the user
     //   userName:   the user displayed name
     //   userEmail:  the user email
-    //   type:       could be one or combined one of "presenter", "host", "attendee" or "panelist"
+    //   bMe:        this client
+    //   bHost:      the user is the host
+    //   bPresenter: the user is the presenter
+    //   bPanelist:  the user is a panelist
     //   mic:        true or false to tell if the user has a mic installed (may or may not muted)
     //   audioMuted: true or false to tell if the user is sending out audio (or muted or unmuted)
     //   cam:        true or false to tell if the user has a cam installed (may or may not sending out video)
     //   videoMuted: true or false to tell if the user is sending out video
     //   activeVideo: true or false to tell if the user is active video
-    roster: [{action:"add", nodeId:0, userName: "", userEmail: "", type:"presenter|host",
+    roster: [{action:"add", nodeId:0, userName: "", userEmail: "", bHost:true, bPresenter:false,
               mic:true, audioMuted:true, cam:true, videoMuted:true, activeVideo:true}],
 
     mic: [],          // an array one entry for each local mic
