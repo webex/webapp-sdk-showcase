@@ -112,6 +112,7 @@ let autoSubFlag = document.getElementById("autoSubFlag");
 // set initial values
 let siteUrlInput = document.getElementById("siteUrlInput");
 let meetingKeyInput = document.getElementById("meetingKey");
+let meetingPw = document.getElementById("meetingPw");
 let siteUrlSel = document.getElementById("siteUrl");
 let sessionToken = document.getElementById("sessionToken");
 let userDisplayName = document.getElementById("userDisplayName");
@@ -125,8 +126,6 @@ siteUrlSel.onclick = function() {
   siteUrlInput.value = siteUrlSel.value;
   meetingKeyInput.value = siteUrlSel.options[siteUrlSel.selectedIndex].id;
 };
-//let password = "1234567890";
-let password = "";
 
 // running panel
 let liveVideo = document.getElementById("liveVideo");
@@ -298,8 +297,9 @@ function setDisplay(results) {
 
 function getUserString(userInfo) {
   let userLine = userInfo.activeVideo?"(*) ": "";
-  userLine += userInfo.userName + ":" + userInfo.nodeId + ((userInfo.bHost) ? "(host)" : '');
-  userLine += (userInfo.bPresenter) ? "(presenter)" : '';
+  userLine += userInfo.userName + ":" + userInfo.nodeId +((userInfo.bHost) ? "(H" : '(');
+  userLine += (userInfo.bPresenter) ? "P" : '';
+  userLine += (userInfo.bMe) ? "M)" : ')';
   userLine += !userInfo.mic ? '' : userInfo.audioMuted ? " mic(muted)" : " mic(on)";
   userLine += !userInfo.cam ? '' : userInfo.videoMuted ? " cam(muted)" : " cam(on)";
   return userLine;
@@ -307,6 +307,7 @@ function getUserString(userInfo) {
 
 function handleRoster(roster) {
   roster.forEach(function (user) {
+    if (!user) { return;}
     if (user.action.match(/add/i)) {
       addUser(user.userInfo);
     } else if (user.action.match(/update/i)) {
@@ -402,7 +403,7 @@ function onLoadingSuccess(results) {
     meetingKey:meetingKeyInput.value,
     userEmail:userEmail.value,
     siteURL:siteUrlInput.value,
-    password:password,
+    password:meetingPw.value,
     userName:userName.value,
     userPassword: userPassword.value,
     userDisplayName: userDisplayName.value,
