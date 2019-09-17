@@ -7,4 +7,6 @@ The APIs are given in doc/sdkApi.js. Not all of APIs have been implemented yet a
 # SDK showcases
 
 ### PanTool
-The source code is included in PanTool. PanTool.html displays a table to give the user to fill in the meeting information and the session paramters. PanTool.js shows the basic call flow and APIs used to join a meeting. The current alpha version 1.0 supports join-meeting only.
+The source code is included in PanTool. PanTool.html displays a table to give the user to fill in the meeting information and the session paramters. 
+PanTool.js shows the basic call flow and APIs used to join a meeting. The current alpha version 0.2 supports join-meeting and start-meeting 
+with username/password.
