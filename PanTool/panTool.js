@@ -41,13 +41,20 @@
 let meetingInfo = document.getElementById("meetingInfo");
 let runPanel = document.getElementById("runPanel");
 let userRoster = document.getElementById("userRoster");
-
+let userNameInRoster = document.getElementById("userNameInRoster");
+let muteMicRosterChecked = document.getElementById("muteMicRosterChecked");
+let recvChatText = document.getElementById("recvChatText");
+let sendChatText = document.getElementById("sendChatText");
+let toWhom = document.getElementById("toWhom");
+let sendChatButton = document.getElementById("sendChatButton");
+let camList = null;
 
 // buttons
 let joinMeetingButton = document.getElementById('JoinMeeting');
 let leaveMeetingButton = document.getElementById('LeaveMeeting');
 let sendVideoButton = document.getElementById('sendVideo');
 let muteAudioCheck = document.getElementById('muteCheck');
+let muteAllAudioCheck = document.getElementById('muteAllCheck');
 
 // session parameter
 let audioRecvFlag = document.getElementById("audioRecvFlag");
@@ -204,7 +211,19 @@ function meetingEndUIReset() {
   setInitDisplay();
   runPanel.setAttribute("hidden", true);
   meetingInfo.removeAttribute("hidden");
-  document.getElementById('userRoster').innerText = null;
+  userRoster.innerText = null;
+  toWhom.innerText = null;
+  recvChatText.innerText = null;
+
+  // add default option
+  let element = document.createElement("option");
+  element.text = "Everyone";
+  element.nodeId = 0;
+  toWhom.add(element);
+
+  // roster mute
+  muteMicRosterChecked.checked = false;
+  userNameInRoster.innerText = "";
 }
 
 
@@ -238,6 +257,23 @@ function setAudioDisplay(results) {
     audio.mediaElement.style.width = '195px';
     audio.mediaElement.style.height = '20px';
   });
+}
+
+function amIHost() {
+  let bHost = false;
+  for (let i = 0; i < userRoster.length; i++) {
+    if (userRoster[i].userInfo.bHost && userRoster[i].userInfo.bMe) {return true};
+  }
+  return false;
+}
+
+function updateWaitingStatus() {
+  if (userRoster.length !== 1) { return;}
+
+  videoThumbText[0].removeAttribute("hidden");
+  videoThumb[0].setAttribute("hidden", true);
+  videoThumbLabel[0].setAttribute("hidden", true);
+  videoThumbText[0].innerHTML = amIHost()? "Waiting for participants to join" : "Waiting for the host to join";
 }
 
 function setVideoDisplay(results) {
@@ -281,6 +317,8 @@ function setVideoDisplay(results) {
       videoThumbLabel[peerId].setAttribute("hidden", true);
 
       //video.mediaElement.pause();
+    } else { // peerId = 0 and is idle
+      updateWaitingStatus();
     }
   });
 }
@@ -299,7 +337,8 @@ function getUserString(userInfo) {
   let userLine = userInfo.activeVideo?"(*) ": "";
   userLine += userInfo.userName + ":" + userInfo.nodeId +((userInfo.bHost) ? "(H" : '(');
   userLine += (userInfo.bPresenter) ? "P" : '';
-  userLine += (userInfo.bMe) ? "M)" : ')';
+  userLine += (userInfo.bMe) ? "M" : '';
+  userLine += (userInfo.bSpeaking) ? "S)" : ')';
   userLine += !userInfo.mic ? '' : userInfo.audioMuted ? " mic(muted)" : " mic(on)";
   userLine += !userInfo.cam ? '' : userInfo.videoMuted ? " cam(muted)" : " cam(on)";
   return userLine;
@@ -315,19 +354,34 @@ function handleRoster(roster) {
     } else if (user.action.match(/delete/i)) {
       removeUser(user.userInfo);
     }
+
   });
+
+  updateWaitingStatus();
 
   function addUser(userInfo) {
     let element = document.createElement("option");
     element.text = getUserString(userInfo);
     element.userInfo = userInfo;
     userRoster.add(element);
+
+    // update the mute toggle
+    if (userInfo.audioMuted !== undefined && userInfo.bMe) {
+      muteAudioCheck.checked = userInfo.audioMuted;
+    }
+
+    let element2 = document.createElement("option");
+    element2.text = userInfo.userName;
+    element2.nodeId = userInfo.nodeId;
+    toWhom.add(element2);
+
   }
 
   function removeUser(userInfo) {
     for (let i = 0; i < userRoster.length; i++) {
       if (userRoster[i].userInfo.nodeId == (userInfo.nodeId)) {
         userRoster.remove(i);
+        toWhom.remove(i+1);
         break;
       }
     }
@@ -349,15 +403,13 @@ function handleRoster(roster) {
       user.userInfo[item] = userInfo[item];
     }
     user.text = getUserString(user.userInfo);
+
+    // update the mute toggle
+    if (userInfo.audioMuted !== undefined && user.userInfo.bMe) {
+      muteAudioCheck.checked = userInfo.audioMuted;
+    }
   }
 }
-
-userRoster.onclick = function () {
-  console.log(">>>: ");
-  for (let i = 0; i < userRoster.length; i++) {
-    console.log(">>>: " + JSON.stringify(userRoster[i].userInfo));
-  }
-};
 
 function getUserName(nodeId) {
   let userName ="empty";
@@ -371,10 +423,27 @@ function getUserName(nodeId) {
   return userName;
 }
 
+
+let chatPriviledge = "";
+function handleChatMsg(data) {
+  if (data.privilege) {
+    chatPriviledge = data.privilege;
+    return;
+  }
+  if (data.message) {
+    let sender = getUserName(data.message.senderId);
+    let displayedMsg = "From " + sender + " " + data.message.scope + " >" + data.message.data;
+    let element = document.createElement("option");
+    element.text = displayedMsg;
+    recvChatText.add(element);
+  }
+}
+
 // --------------- API calls and callback ------------------------------------------
 
 // functions
 let status = "";
+
 /**
  * called when the SDK loading is completed.
  *
@@ -447,8 +516,15 @@ function onLoadingSuccess(results) {
       if (!results.meetingStatus || !results.meetingStatus.match(/failure/i)) {
         if (results.roster) {
           handleRoster(results.roster);
+
         } else if (results.cam) {
-          console.log("results = ", results.cam);
+          console.log("cam = ", results.cam);
+          camList =  results.cam;
+
+        } else if (results.chat) {
+          console.log("results = ", results.chat);
+          handleChatMsg(results.chat);
+
         } else if (results.meetingStatus && results.meetingStatus.match(/end/i)) {
           meetingEndUIReset();
         }
@@ -552,4 +628,74 @@ muteAudioCheck.onclick=function () {
     bMute = (!rv)? bMute : !bMute;
   }
   muteAudioCheck.checked = bMute;
+};
+
+/**
+ * mute/unmute all Audio users
+ */
+muteAllAudioCheck.onclick=function () {
+  console.log("muteAllAudioCheck ", muteAllAudioCheck.checked?"on":"off");
+
+  let bMute = muteAllAudioCheck.checked;
+  let action = bMute?"muteAll":"unmuteAll";
+  let meetingKey = meetingKeyInput.value;
+  console.log("muteAllAudioCheck to " + " meetingKey:" + meetingKey + " user:" + userEmail.value +
+    " siteUrl:" + siteUrlInput.value, " to mute: " + bMute);
+
+  if (status.match(/success/i)) {
+    let rv = WebexSDK.controlMeeting(meetingKey, action, 0);
+    bMute = (!rv)? bMute : !bMute;
+  }
+  muteAllAudioCheck.checked = bMute;
+};
+
+
+
+/**
+ * send chat msg
+ */
+sendChatButton.onclick=function () {
+  console.log("chat msg to send ", sendChatText.value);
+  let dstNodeId = toWhom[toWhom.selectedIndex].nodeId || 0;
+  let action = "sendChatMsg";
+  let actionItem = {nodeId:dstNodeId, scope:"toAll", msg:sendChatText.value};
+  let meetingKey = meetingKeyInput.value;
+  console.log("sendChatButton to " + " meetingKey:" + meetingKey + " actionItem=", actionItem);
+
+  if (status.match(/success/i)) {
+    let rv = WebexSDK.controlMeeting(meetingKey, action, actionItem);
+  }
+  sendChatText.value = "";
+
+};
+
+userRoster.onclick = function () {
+  console.log(">>>: ");
+  for (let i = 0; i < userRoster.length; i++) {
+    console.log(">>>: " + JSON.stringify(userRoster[i].userInfo));
+  }
+  let selected = userRoster.selectedIndex;
+  userNameInRoster.innerText = userRoster[selected].userInfo.userName;
+  muteMicRosterChecked.checked = !!userRoster[selected].userInfo.audioMuted;
+};
+
+muteMicRosterChecked.onclick = function () {
+  let selected = userRoster.selectedIndex;
+  if (selected < 0) {
+    muteMicRosterChecked.checked = false;
+    userNameInRoster.innerText = "";
+    return;
+  }
+  userNameInRoster.innerText = userRoster[selected].userInfo.userName;
+  let bMute = muteMicRosterChecked.checked;
+  let action = bMute?"mute":"unmute";
+  let nodeId = userRoster[selected].userInfo.nodeId;
+  if (status.match(/success/i)) {
+    let meetingKey = meetingKeyInput.value;
+    let rv = WebexSDK.controlMeeting(meetingKey, action, nodeId);
+  }
+
+  userRoster.selectedIndex = -1;
+  muteMicRosterChecked.checked = false;
+  userNameInRoster.innerText = "";
 };

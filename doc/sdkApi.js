@@ -28,7 +28,7 @@
  The views and conclusions contained in the software and documentation
  are those of the authors and should not be interpreted as representing
  official policies, either expressed or implied, of Cisco.
-*/
+ */
 
 /**
  * @file sdkApi.js
@@ -64,16 +64,16 @@ const WebexSDK = {
   defaultMeetingParam: {
     meetingKey:   null, // Mandatory, a 9 digit meeting key.
     password:     null, // optional , a string of meeting password
-    userEmail:    null, // Mandatory, an email address
+    userEmail:    null, // optional, an email address
     userDisplayName:  null, // Optional,  a name to be displayed in clients for the user
     siteURL:      null, // Optional,  a site URL with it the meeting is held
 
-    // for host to start a meeting
+    // for host to start a meeting (no username/password approach in production)
     username:     null, // optional if sessionToken presents, to start a meeting; optional for an attendee
     userPassword: null, // optional if sessionToken presents, to start a meeting; option for an attendee
     sessionToken: null, // optional if username/userPassword presents, to start a meeting; option for an attendee
 
-    apiToken:     null, // Mandatory, an apitoken to gain the access the meeting service using this SDK
+    apiToken:     null, // Optional, an apitoken to gain the access the meeting service using this SDK
   },
 
   // default session parameter.
@@ -93,7 +93,7 @@ const WebexSDK = {
         send: false,
         // {frameRate: 5},
       },
-      chat: null,
+      chat: true, // cannot be disabled
       polling: null,
 
       autoSubscribe: true, // will subscribe the streams available from each participants
@@ -102,42 +102,42 @@ const WebexSDK = {
   },
 
   // return results from joinMeeting, addSession, etc. irrelevant parameters may be omitted
-    jmResults: {
-      type: 'joinMeeting',     // (mandatory)
-      meetingKey: 0,           // (mandatory) a 9-digit meeting key
+  jmResults: {
+    type: 'joinMeeting',     // (mandatory)
+    meetingKey: 0,           // (mandatory) a 9-digit meeting key
 
-      // (mandatory for the first callback) "success", "failure", "close", "InProgress", "meetingLocked",
-      //                                    "waitForHost" and "in-lobby".
-      // (optional for followed up callback)
-      status:  "success",
+    // (mandatory for the first callback) "success", "failure", "close", "InProgress", "meetingLocked",
+    //                                    "waitForHost" and "in-lobby".
+    // (optional for followed up callback)
+    status:  "success",
 
-      // (optional) audio tag array with index given by peerId from 0 to MAX_AUDIO_RECV_CHAN -1
-      // audio: [] to indicate the audio session is closed.
-      audio:   [{mediaElem:{}, peerId: 0}],
+    // (optional) audio tag array with index given by peerId from 0 to MAX_AUDIO_RECV_CHAN -1
+    // audio: [] to indicate the audio session is closed.
+    audio:   [{mediaElem:{}, peerId: 0}],
 
-      // (optional) video object array,
-      //   video: []  to indicate the video session is closed.
-      //   mediaElem: the video element created with createElement("video")
-      //   action:    (optional) "new|refresh", with default "new". "refresh" to mean a new video element is created for
-      //                the given video object identified with peerId.
-      //   peerId:    the video index from 0 to to MAX_VIDEO_RECV_CHAN,
-      //   nodeId:    the user id when state != "idle", which can be used to identify the user from the roster
-      //   state:     the video object state including
-      //     idle :      not assigned any user,
-      //     assigned:   assigned to a user identified with nodeId and set with avatar
-      //     liveStream: assigned to a user and receiving the live stream from the user
-      //     hidden:     assigned to a user and not expected to show
-      //     selfLiveStream:  assigned to the client itself of the cam video
-      video:   [{mediaElem:{}, action: "new|flush", peerId: 0, nodeId: 0, state:'idle|assigned|liveStream|avatar|hidden'}],
+    // (optional) video object array,
+    //   video: []  to indicate the video session is closed.
+    //   mediaElem: the video element created with createElement("video")
+    //   action:    (optional) "new|refresh", with default "new". "refresh" to mean a new video element is created for
+    //                the given video object identified with peerId.
+    //   peerId:    the video index from 0 to to MAX_VIDEO_RECV_CHAN,
+    //   nodeId:    the user id when state != "idle", which can be used to identify the user from the roster
+    //   state:     the video object state including
+    //     idle :      not assigned any user,
+    //     assigned:   assigned to a user identified with nodeId and set with avatar
+    //     liveStream: assigned to a user and receiving the live stream from the user
+    //     hidden:     assigned to a user and not expected to show
+    //     selfLiveStream:  assigned to the client itself of the cam video
+    video:   [{mediaElem:{}, action: "new|flush", peerId: 0, nodeId: 0, state:'idle|assigned|liveStream|avatar|hidden'}],
 
-      // (optional) video or canvas tag array for sharing (including audio), up to MAX_SHARING_RECV_CHAN
-      // sharing: [] to indicate the sharing session is closed.
-      sharing: [{mediaElem:{}, action: "new", peerId: 0, state:'idle|assigned|liveStream'}],
+    // (optional) video or canvas tag array for sharing (including audio), up to MAX_SHARING_RECV_CHAN
+    // sharing: [] to indicate the sharing session is closed.
+    sharing: [{mediaElem:{}, action: "new", peerId: 0, state:'idle|assigned|liveStream'}],
 
-      msg:     "",         // (mandatory for msg for non-failure)
-      errMsg:  "",         // (mandatory for error msg for failure)
-      data:    {},         // (optional) in progress data
-    },
+    msg:     "",         // (mandatory for msg for non-failure)
+    errMsg:  "",         // (mandatory for error msg for failure)
+    data:    {},         // (optional) in progress data
+  },
 
 
   /**
@@ -213,7 +213,7 @@ const WebexSDK = {
     //   videoMuted: true or false to tell if the user is sending out video
     //   activeVideo: true or false to tell if the user is active video
     roster: [{action:"add", nodeId:0, userName: "", userEmail: "", bHost:true, bPresenter:false,
-              mic:true, audioMuted:true, cam:true, videoMuted:true, activeVideo:true}],
+      mic:true, audioMuted:true, cam:true, videoMuted:true, activeVideo:true}],
 
     mic: [],          // an array one entry for each local mic
                       //   {action:"list|add|delete|muted|unmuted", label:null, name:null, id:null, default:true/false}
@@ -221,6 +221,13 @@ const WebexSDK = {
                       //   {action:"list|add|delete|muted|unmuted", label:null, name:null, id:null, default:true/false}
     cam: [],          // an array one entry for each local cam
                       // {action:"list|add|delete", label:null, id:null, default:true/false}
+
+    // privilege: {toAll:true, toHost:true, toPresenter:true, toPublic:true} for the privilege of this client to send.
+    // message: {senderId: sender node Id,
+    //           scope: "toAll|toMe|mySelf|echo|toHost|toPresenter|toPanelist|toHostPresenterPanelist",
+    //           data: the chat message in string} the messages received
+    chat: {privilege:{}, message:{senderId:0 , scope: "", data:""}},
+
     micVolume: 0,     // mic volume at the Cur time for the selected mic.
 
     speaking: [],     // speaker user list in loudest order {nodeId:""}
@@ -235,14 +242,14 @@ const WebexSDK = {
    * @param statusMonitored a status list to be monitored defined in defaultMonitoredStatus
    * @returns {number} 0: success; none-zero: error code for failure
    */
-  monitorMeeting: function(statusMonitored) {
-    return webexSDKImpl.monitorMeeting(statusMonitored)
+  monitorMeeting: function(meetingKey, statusMonitored) {
+    return webexSDKImpl.monitorMeeting(meetingKey, statusMonitored)
   },
 
   // meeting items manipulated. The nodeId is used to identify the user which could be obtained from
   // roster returned in mmResults from the monitoring data. All of parameters are optional and item
   // not presented is treated as no-effect
-  controlMeetingAction: {
+  meetingAction: {
     // action="muteAll|unmuteAll" to mute|unmute all participants (subject to privilege).
     muteAll:   "muteAll",    //  actionItem ignored
     unmuteAll: "unmuteAll",  //  actionItem ignored
@@ -265,6 +272,13 @@ const WebexSDK = {
     // action="callout" to call out a user on telephone(subject to telephone support)
     callout: "callout",     // actionItem = {nodeId:0, url:0},
 
+    // action="sendChatMsg"
+    // actionItem ={nodeId: destination nodeId or 0 for groups,
+    //             scope:"toAll|toHost|toPresenter|toPanelist|toHostPresenterPanelist",
+    //             msg:string},
+    // resultCb omitted
+    sendChatMsg: "sendChatMsg",
+
     // ... TODO
   },
 
@@ -278,11 +292,12 @@ const WebexSDK = {
    *
    * @param meetingKey  the meetingKey with which the meeting is to leave
    * @param action     the action to carry out
-   * @param resultCB   null or callback function with the returned data specified in controlMeetingAction.
+   * @param actionItem the action to carry out
+   * @param resultCb   null or callback function with the returned data defined in meetingAction.
    * @returns {number} 0: success; none-zero: error code for failure
    */
-  controlMeeting: function(meetingKey, action, actionItem, resultCB) {
-    return webexSDKImpl.controlMeeting(meetingKey, action, actionItem, resultCB);
+  controlMeeting: function(meetingKey, action, actionItem, resultCb) {
+    return webexSDKImpl.controlMeeting(meetingKey, action, actionItem, resultCb);
   },
 
   // device/media items controlled. All of parameters are optional and item not presented is treated as no-effect
@@ -323,7 +338,7 @@ const WebexSDK = {
    *
    * @param meetingKey  the meetingKey with which the meeting is to leave
    * @param action     the action with parameters or returned parameters to carry out
-   * @param resultCB   null or callback function with the returned data defined in controlMeetingAction.
+   * @param resultCB   null or callback function with the returned data defined in controlDeviceAction.
    */
   controlDevice: function(meetingKey, action, actionItem, resultCB) {
     return webexSDKImpl.controlDevice(meetingKey, action,  actionItem, resultCB)
@@ -413,3 +428,4 @@ const WebexSDK = {
 window.WebexSDK  = WebexSDK;
 export default WebexSDK;
 webexSDKImpl._init();
+

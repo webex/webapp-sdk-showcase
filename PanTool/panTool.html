@@ -122,7 +122,7 @@ official policies, either expressed or implied, of Cisco.
       <td > <table  width="780px" height="690px" border="1" align = "center">
         <tr height="500px" >
           <td colspan="12" hidden="true" id="liveVideo"></td>
-          <td colspan="12" align="center" id="liveVideoText"> Waiting for video </td>
+          <td colspan="12" align="center" id="liveVideoText"> no content </td>
         </tr>
         <tr height="30px">
           <td colspan="12"  align="center" id="liveVideoLabel"> peerId 0  </td>
@@ -158,10 +158,40 @@ official policies, either expressed or implied, of Cisco.
       </table> </td>
       <td>
         <table height="690px" border="1" align = "center">
-          <tr height="30px" align = "center"><td>Users</td></tr>
-          <tr height="675px"><td  valign="top">
-            <select id="userRoster" style="width:350px" size=42></select>
-          </td></tr>
+          <tr height="30px" align = "center">
+            <td colspan="2">Users</td>
+          </tr>
+          <tr height="410px">
+            <td  valign="top" colspan="2">
+              <select id="userRoster" style="width:350px" size=24></select>
+            </td>
+          </tr>
+          <tr height="12px">
+            <td align="left" id="userNameInRoster" style="width:110px"></td>
+            <td align="left" id="muteMicRoster">
+              Mic Muted <input type="checkbox" id="muteMicRosterChecked">
+            </td>
+          </tr>
+          <tr height="30px">
+            <td align="center" colspan="2">Chat</td>
+          </tr>
+          <tr height="150px">
+            <td  valign="top" align="left" colspan="2">
+              <select id="recvChatText" style="width:350px" size=10></select>
+            </td>
+          </tr>
+          <tr height="30px">
+            <td>
+              <label for="toWhom">To:</label>
+              <select id="toWhom" style="width:80px" >
+                <option value="toAll" selected="selected">Everyone</option>
+              </select>
+            </td>
+            <td>
+              <input type="text" id="sendChatText" style="width: 180px"/>
+              <button id="sendChatButton">Send</button>
+            </td>
+          </tr>
         </table>
       </td>
     </tr>
@@ -170,17 +200,13 @@ official policies, either expressed or implied, of Cisco.
     <button id="LeaveMeeting">Leave Meeting</button>
     <button id="sendVideo">Start Send Video</button>
     <span style="color: purple">MicMuted : <input type="checkbox" id="muteCheck" style="width: 20px"></span>
+    <span style="color: purple">All Muted : <input type="checkbox" id="muteAllCheck" style="width: 20px"></span>
   </div>
 </div>
 
 <script src="./panTool.js" > </script>
-<script src="https://skytech-dev.webex.com.cn/webapp/latest/webex-webapp-sdk.js?traceLevel=4,callback=onSdkLoaded" > </script>
+<script src="https://websdk.webex.com.cn/webapp/latest/webex-webapp-sdk.js?traceLevel=4,callback=onSdkLoaded" > </script>
 
-<!--
-<script src="https://api.webex.com/webapp/latest/webex-webapp-sdk.js?traceLevel=4,callback=onSdkLoaded" > </script>
-<script src="https://skytech-dev.webex.com.cn/webapp/latest/webex-webapp-sdk.js?traceLevel=4,callback=onSdkLoaded" > </script>
-
--->
 
 </body>
 </html>
