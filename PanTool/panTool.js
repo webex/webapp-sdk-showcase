@@ -48,6 +48,7 @@ let sendChatText = document.getElementById("sendChatText");
 let toWhom = document.getElementById("toWhom");
 let sendChatButton = document.getElementById("sendChatButton");
 let camList = null;
+let micList = null;
 
 // buttons
 let joinMeetingButton = document.getElementById('JoinMeeting');
@@ -102,6 +103,9 @@ videoSendFlag.onclick = function(){
 let sharingRecvFlag = document.getElementById("sharingRecvFlag");
 let sharingSendFlag = document.getElementById("sharingSendFlag");
 let sharingFrameRate = document.getElementById("sharingFrameRate");
+let sharingOp = document.getElementById("sharingOp");
+let sharePrevSel = sharingOp.selectedIndex;
+
 
 sharingRecvFlag.onclick = function(){
   if (sharingSendFlag.checked) {
@@ -129,7 +133,7 @@ let userPassword = document.getElementById("userPassword");
 
 meetingKeyInput.value = siteUrlSel.options[siteUrlSel.selectedIndex].id;
 siteUrlInput.value = siteUrlSel.value;
-siteUrlSel.onclick = function() {
+siteUrlSel.onchange = function() {
   siteUrlInput.value = siteUrlSel.value;
   meetingKeyInput.value = siteUrlSel.options[siteUrlSel.selectedIndex].id;
 };
@@ -454,6 +458,7 @@ function onSdkLoaded(results) {
   console.log('onSdkLoaded:' + status + " with msg " + results.msg);
   if (status === "LOADING") {// loading in progress
   } else if (status === "SUCCESS") {
+    //joinMeetingButton.onclick();
   } else if (status === "FAIL") {
   } else if (status === "CLOSE") {
   } else {
@@ -518,8 +523,12 @@ function onLoadingSuccess(results) {
           handleRoster(results.roster);
 
         } else if (results.cam) {
-          console.log("cam = ", results.cam);
+          console.log("cam = ", JSON.stringify(results.cam));
           camList =  results.cam;
+
+        } else if (results.mic) {
+          console.log("mic = ", JSON.stringify(results.mic));
+          micList =  results.mic;
 
         } else if (results.chat) {
           console.log("results = ", results.chat);
@@ -598,7 +607,8 @@ leaveMeetingButton.onclick=function () {
  */
 sendVideoButton.onclick=function () {
   let bSending = videoSendFlag.checked;
-  let sessionParam = {video: {send: !bSending}};
+  let sessionParam = {video: {send: !bSending? {height:SendHeight.value, bitrate:SendBitrate.value}:false}};
+  //SendBitrate.value = +SendBitrate.value+4;
   let meetingKey = meetingKeyInput.value;
   console.log("sendVideoButton to " + " meetingKey:" + meetingKey + " user:" + userEmail.value +
     " siteUrl:" + siteUrlInput.value, " to send: " + !bSending);
@@ -675,8 +685,10 @@ userRoster.onclick = function () {
     console.log(">>>: " + JSON.stringify(userRoster[i].userInfo));
   }
   let selected = userRoster.selectedIndex;
-  userNameInRoster.innerText = userRoster[selected].userInfo.userName;
-  muteMicRosterChecked.checked = !!userRoster[selected].userInfo.audioMuted;
+  if (selected > 0) {
+    userNameInRoster.innerText = userRoster[selected].userInfo.userName;
+    muteMicRosterChecked.checked = !!userRoster[selected].userInfo.audioMuted;
+  }
 };
 
 muteMicRosterChecked.onclick = function () {
@@ -698,4 +710,48 @@ muteMicRosterChecked.onclick = function () {
   userRoster.selectedIndex = -1;
   muteMicRosterChecked.checked = false;
   userNameInRoster.innerText = "";
+};
+
+/**
+ * sharing
+ */
+sharingOp.onchange=function () {
+  let meetingKey = meetingKeyInput.value;
+  let op = sharingOp.options[this.selectedIndex].value;
+  console.log("sharingOp on " + op, " for meetingKey:" + meetingKey + " user:" + userEmail.value +
+    " siteUrl:" + siteUrlInput.value);
+  if (!op.match(/sharing|HFRS/i)) { return;}
+
+  // got the requests
+  let sessionParam = {};
+  sessionParam.sharing = (!op.match(/stop/i) && {}) || false;
+  if (sessionParam.sharing) {
+    sessionParam.sharing.send = !!op.match(/send/i);
+    sessionParam.sharing.frameRate = !!op.match(/sendHFRS/i) && 30 || 5;
+    sessionParam.sharing.recv = !!op.match(/recv/i);
+  }
+  console.log("sharingOp on " + op, " for meetingKey:" + meetingKey + " user:" + userEmail.value +
+    " siteUrl:" + siteUrlInput.value + " session Param =" + JSON.stringify(sessionParam));
+
+  if (status.match(/success/i)) {
+    let error = WebexSDK.updateMeeting(meetingKey, sessionParam);
+    if (error) {
+      sharingOp.options[sharePrevSel].selected = 'selected';
+    } else {
+      sharePrevSel = sharingOp.selectedIndex;
+    }
+  }
+};
+
+//---------------------- unload page ----------------------
+function onExit() {
+  leaveMeetingButton.onclick();
+}
+
+window.onunload = function() {
+  onExit();
+};
+
+window.onbeforeunload = function() {
+  onExit();
 };

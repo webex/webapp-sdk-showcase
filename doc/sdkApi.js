@@ -85,7 +85,7 @@ const WebexSDK = {
     return {
       audio: {recv: true, send: true, viaVoIP: true, muteOnEntry:false}, // fallback to telephone
       video: {
-        recv: {height: 720, width: 1280, bitrate: 1920000, chnNum: 7},
+        recv: {height: 720, width: 1280, bitrate: 1536000, chnNum: 7},
         send: false, //{height: 720, width: 1280, bitrate: 192000}, // recv must true to send
       },
       sharing: {
@@ -215,12 +215,15 @@ const WebexSDK = {
     roster: [{action:"add", nodeId:0, userName: "", userEmail: "", bHost:true, bPresenter:false,
       mic:true, audioMuted:true, cam:true, videoMuted:true, activeVideo:true}],
 
-    mic: [],          // an array one entry for each local mic
-                      //   {action:"list|add|delete|muted|unmuted", label:null, name:null, id:null, default:true/false}
-    speaker: [],      // an array one entry for each local speaker
-                      //   {action:"list|add|delete|muted|unmuted", label:null, name:null, id:null, default:true/false}
-    cam: [],          // an array one entry for each local cam
-                      // {action:"list|add|delete", label:null, id:null, default:true/false}
+    // for mic/speaker/cam, the truth of "selectable" means that the APIs take the selected device from the client.
+    // an array one entry for each local mic.
+    mic: [{action:"add|delete", label:"my  mic label", id: "my mic id", selected: false, selectable:false}],
+
+    // an array one entry for each local speaker.
+    speaker: [{action:"add|delete", label:"my  speaker label", id: "my speaker id", selected: false, selectable:false}],
+
+    // an array one entry for each local cam.
+    cam: [{action:"add|delete", label:"my  cam label", id: "my cam id", selected: false, selectable:false}],
 
     // privilege: {toAll:true, toHost:true, toPresenter:true, toPublic:true} for the privilege of this client to send.
     // message: {senderId: sender node Id,
@@ -424,8 +427,9 @@ const WebexSDK = {
    * @param {number} port      - the port number if not given in proxyAddr
    */
   setProxy: function (proxyAddr, port) { webexSDKImpl.setProxy(proxyAddr, port);},
+
+  sdkVersion: '40.6.0',
 };
 window.WebexSDK  = WebexSDK;
 export default WebexSDK;
 webexSDKImpl._init();
-
