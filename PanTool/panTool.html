@@ -52,15 +52,25 @@ official policies, either expressed or implied, of Cisco.
     </tr>
     <tr>
       <td>
-        siteURL:<input id="siteUrlInput" style="width: 300px" type="text" value="https://test-dev.webex.com">
+        siteURL:<input id="siteUrlInput" style="width: 300px" type="text" value="https://pj1duanpei.eng.webex.com">
         <select id="siteUrl" >
-           <option value="https://test-dev.webex.com" id="111 111 111">skytech-dev</option>
+          <option value="https://pj1duanpei.eng.webex.com" id="648 135 151">pj1duanpei</option>
+          <option value="https://cisco.webex.com" id="200 378 206">cisco</option>
+          <option value="https://sademo13.dmz.webex.com" id="311 991 528">sademo13</option>
+          <option value="https://skytech-test.webex.com.cn" id="183 354 212">skytech-test</option>
+          <option value="https://skytech-dev.webex.com.cn" id="103 896 592">skytech-dev</option>
+          <option value="https://sqdemo30.dmz.webex.com" id="714 803 424">sqdemo30</option>
+          <option value="https://sqdemo34.dmz.webex.com" id="717 505 069">sqdemo34</option>
+          <option value="https://pj1demo3.eng.webex.com" id="647 102 966">pj1demo3</option>
+          <option value="https://train.qa.webex.com" id ="232 505 023">train.qa</option>232 505 023
+          <option value="https://go.webex.com" id ="348 526 830">go</option>
+          <option value="https://alpha.webex.com" id ="123 849 357">alpha</option>
         </select> <br>
-        MeetingKey:<input id="meetingKey" type="text" value="111 111 111">meetingPassword:
-                    <input id="meetingPw" style="width: 100px" type="text" value=""><br>
+        MeetingKey:<input id="meetingKey" type="text" value="648 135 151">
+        meetingPassword:<input id="meetingPw" style="width: 100px" type="text" value=""><br>
         Email:<input id="email" type="text" value="dwu@cisco.com"><br>
-        Username:<input id="userName" type="text" value="dwu"><br>
-        userPassword:<input id="userPassword" type="text" value=""><br>
+        Username:<input id="userName" type="text" value="demo"><br>
+        UserPassword:<input id="userPassword" type="text" value=""><br>
         DisplayName:<input id="userDisplayName" type="text" value=""><br>
         SessionToken:<input id="sessionToken" type="text" value="">
       </td>
@@ -77,16 +87,16 @@ official policies, either expressed or implied, of Cisco.
           <tr>
             <td><b>video:</b> </td>
             <td>recv: <input type="checkbox" id="videoRecvFlag" style="width: 20px" checked> </td>
-            <td>height <input type="text" id="RecvHeight" style="width: 40px", value="720">
-              bitrate: <input type="text" id="RecvBitrate" style="width: 60px", value="1920000">
+            <td>height <input type="text" id="RecvHeight" style="width: 40px", value="360">
+              bitrate: <input type="text" id="RecvBitrate" style="width: 60px", value="1563000">
               chnNum: <input type="text" id="RecvChuNum" style="width: 40px", value="7">
             </td>
           </tr>
           <tr>
             <td></td>
             <td>send: <input type="checkbox" id="videoSendFlag" style="width: 20px"> </td>
-            <td>height <input type="text" id="SendHeight" style="width: 40px", value="720">
-              bitrate <input type="text" id="SendBitrate" style="width: 60px", value="1920000">
+            <td>height <input type="text" id="SendHeight" style="width: 40px", value="360">
+              bitrate <input type="text" id="SendBitrate" style="width: 60px", value="1563000">
             </td>
           </tr>
           <tr>
@@ -121,7 +131,7 @@ official policies, either expressed or implied, of Cisco.
       <td > <table  width="780px" height="690px" border="1" align = "center">
         <tr height="500px" >
           <td colspan="12" hidden="true" id="liveVideo"></td>
-          <td colspan="12" align="center" id="liveVideoText"> no content </td>
+          <td colspan="12" align="center" id="liveVideoText"> Waiting for video </td>
         </tr>
         <tr height="30px">
           <td colspan="12"  align="center" id="liveVideoLabel"> peerId 0  </td>
@@ -198,7 +208,14 @@ official policies, either expressed or implied, of Cisco.
   <div align = "center" style="background-color:lightgrey; width:600px; padding:5px; margin:10px auto">
     <button id="LeaveMeeting">Leave Meeting</button>
     <button id="sendVideo">Start Send Video</button>
-    <span style="color: purple">MicMuted : <input type="checkbox" id="muteCheck" style="width: 20px"></span>
+    <select id="sharingOp" style="width:110px" >
+      <option value="none" selected="selected">sharing</option>
+      <option value="stopSharing">Stop Sharing</option>
+      <option value="recvSharing">Recv Sharing</option>
+      <option value="sendSharing">Send Sharing</option>
+      <option value="sendHFRS">Send HFRS</option>
+    </select>
+    <span style="color: purple">Mic Muted : <input type="checkbox" id="muteCheck" style="width: 20px"></span>
     <span style="color: purple">All Muted : <input type="checkbox" id="muteAllCheck" style="width: 20px"></span>
   </div>
 </div>
